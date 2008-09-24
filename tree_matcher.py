@@ -101,6 +101,7 @@ class TreeMatcher:
         unmatched1, unmatched2 = [], []
         leaf_labels1, middle_labels1 = self._tree1.get_labels()
         leaf_labels2, middle_labels2 = self._tree2.get_labels()
+        self._map(self._tree1.get_root(), self._tree2.get_root())
         for equal, labels1, labels2 in \
                 ((self._leaf_equal, leaf_labels1, leaf_labels2),
                  (self._middle_equal, middle_labels1, middle_labels2)):

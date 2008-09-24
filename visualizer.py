@@ -1,10 +1,11 @@
 from tree_matcher import TreeMatcher
 from sys import stdout
+import codecs
 
 class VisualTreeMatcher(TreeMatcher):
     def draw_trees(self, draw_mapping=False, fn=None):
         if fn:
-            out = open(fn, 'w')
+            out = codecs.open(fn, 'w', 'utf-8')
         else:
             out = stdout
         print >>out, 'digraph G {'
@@ -16,8 +17,6 @@ class VisualTreeMatcher(TreeMatcher):
         if draw_mapping:
             for n1, n2 in self._mapping:
                 print >>out, '%s -> %s [color=blue,dir=none,style=dashed,constraint=false];' % (id(n1), id(n2))
-        for a,b in self._weirdpairs:
-            print >>out, '%s -> %s [color=red,dir=none,style=dashed,constraint=false];' % (a, b)
         print >>out, '}'
         if fn:
             out.close()

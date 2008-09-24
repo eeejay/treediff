@@ -58,7 +58,7 @@ class DomTreeIface(TreeIface):
             lname = self.get_label(p).split('~',1)[-1]
             if p.nodeType == Node.ATTRIBUTE_NODE:
                 lname = '@' + lname
-            if p.nodeType == Node.TEXT_NODE:
+            elif p.nodeType == Node.TEXT_NODE:
                 lname = 'text()'
             else:
                 lname += '[%s]' % (self.get_index_in_parent(p, True) + 1)
@@ -69,6 +69,8 @@ class DomTreeIface(TreeIface):
         if node.nodeType == node.ATTRIBUTE_NODE:
             node.ownerElement.removeAttributeNode(node)
             self._update_descendant_count(node.ownerElement)
+            # Hackish, and dangerous since the node is unlinked.
+            node.ownerElement = None
             parent.setAttributeNode(node)
         else:
             node.parentNode.removeChild(node)
@@ -77,7 +79,7 @@ class DomTreeIface(TreeIface):
             except IndexError:
                 parent.appendChild(node)
             else:
-                parent.insertBefore(refnode, node)
+                parent.insertBefore(node, refnode)
             self._update_descendant_count(self.get_parent(node))
         self._update_descendant_count(parent)
     def insert(self, label, value, parent, index):
@@ -102,7 +104,7 @@ class DomTreeIface(TreeIface):
             except IndexError:
                 parent.appendChild(n)
             else:
-                parent.insertBefore(refnode, n)
+                parent.insertBefore(n, refnode)
 
         self._update_descendant_count(parent)
         return n
@@ -117,27 +119,25 @@ class DomTreeIface(TreeIface):
         self._update_descendant_count(parent)
     def update(self, node, val):
         if node.nodeType == node.ATTRIBUTE_NODE:
-            node.value = val
+            node.ownerElement.setAttribute(node.name, val)
         if node.nodeType == node.TEXT_NODE:
             node.data = val
 
 if __name__ == '__main__':
     from sys import argv
+    from xml.dom.minidom import parse
+    from dom_tree_matcher import DomTreeMatcher
+
     fn = ['tests/simple_tree1.xml', 'tests/simple_tree2.xml']
     if len(argv[1:]) == 2:
         fn = argv[1:]
 
-    def walk(node, indent=0):
-        print '%s%s' % (' '*indent, node)
-        for n in node.childNodes:
-            walk(n, indent+1)
-
-    from xml.dom.minidom import parse
-    from dom_tree_matcher import DomTreeMatcher
+    #from visualizer import VisualTreeMatcher as DomTreeMatcher
     dom1 = parse(fn[0])
     dom2 = parse(fn[1])
     tm = DomTreeMatcher(dom1, dom2)
 #    tm._match()
-#    tm.draw_trees(True)
+#    tm.draw_trees(True, '/tmp/t.dot')
     s = tm.get_opcodes()
-    for i in s: print i
+#    for i in s: print i
+    print s._xupdate_doc.toprettyxml()

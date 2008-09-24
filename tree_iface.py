@@ -81,9 +81,12 @@ class TreeIface:
             if node and self.get_children(node):
                 for n in self.get_children(node):
                     _get_labels(n, middle_labels, leaf_labels)
-                middle_labels.setdefault(self.get_label(node), []).append(node)
+                if node != self.get_root():
+                    middle_labels.setdefault(
+                        self.get_label(node), []).append(node)
             elif node:
-                leaf_labels.setdefault(self.get_label(node), []).append(node)
+                leaf_labels.setdefault(
+                    self.get_label(node), []).append(node)
         leaf_labels = {}
         middle_labels = {}
         _get_labels(self.get_root(), middle_labels, leaf_labels)

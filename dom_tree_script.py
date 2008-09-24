@@ -35,8 +35,14 @@ class XupdateScriptStore(ScriptStore):
             else:
                 element = self._append_instruction(
                     'append', 
-                    self._tree.node_repr(self._inserted_ancestor.parent or '/'))
-            element.appendChild(self._inserted_ancestor.cloneNode(True))
+                    self._tree.node_repr(
+                        self._tree.get_parent(self._inserted_ancestor) or '/'))
+            if self._inserted_ancestor.nodeType == \
+                    self._inserted_ancestor.ATTRIBUTE_NODE:
+                element.setAttributeNode(
+                    self._inserted_ancestor.cloneNode(True))
+            else:
+                element.appendChild(self._inserted_ancestor.cloneNode(True))
             self._inserted_ancestor = None
 
     def _is_ancestor(self, node, ancestor):
@@ -167,8 +173,8 @@ class SideBySideScript(ScriptStore):
                     doc.documentElement.appendChild(template)
                 elif self._node_type_from_xpath(del_path) == Node.TEXT_NODE:
                     self._append_comment(doc, 'Delete Text')
+                    del_path = del_path[:del_path.rindex('/')]
                     template = self._path_template(
-                        del_path = del_path[:del_path.rindex('/')]
                         doc, 'left' +del_path, {'revised' : 'deleted-text'})
                     doc.documentElement.appendChild(template)
                     
