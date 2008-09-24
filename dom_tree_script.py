@@ -1,6 +1,66 @@
 from xml.dom import Node
 from xml.dom.minidom import getDOMImplementation
 from script_store import ScriptStore
+from random import random
+
+class MarkChangesScriptStore(ScriptStore):
+    def __init__(self, tree):
+        ScriptStore.__init__(self, tree)
+        self._orig_tree = tree.deep_copy()
+        self._pairs = dict(zip(tree.nodes_breadth(), 
+                               self._orig_tree.nodes_breadth()))
+        self._deleted = []
+        self._inserted = []
+        self._moved = []
+        self._updated = {}
+
+    def move(self, node, parent, index):
+        self._moved.append(
+            (self._pairs[node], node, hex(hash(random()))))
+        ScriptStore.move(self, node, parent, index)
+
+    def update(self, node, value):
+        if node_type == Node.ATTRIBUTE_NODE:
+            self._updated.setdefault(node.ownerElement, []).append(node.name)
+        ScriptStore.update(self, node, value)
+
+    def insert(self, node, label, value, parent, index):
+        self._inserted.append(node)
+        ScriptStore.insert(self, node, label, value, parent, index)
+
+    def delete(self, node):
+        self._deleted.append(self._pairs[node])
+        ScriptStore.delete(self, node)
+    
+
+    def _mark_change(self, node, change_text):
+        ops = node.getAttribute('revTree')
+        if ops:
+            ops = ','.join(ops.split(',') + [change_text])
+        else:
+            ops = change_text
+        node.setAttribute('revTree', ops)
+
+    def get_tree_revs(self):
+        for n in self._deleted:
+            if n.nodeType == Node.TEXT_NODE:
+                self._mark_change(n.parentNode, 'deleted-text')
+            else:
+                self._mark_change(n, 'deleted')
+        for n1, n2, move_id in self._moved:
+            for n in (n1, n2):
+                self._mark_change(n, 'moved')
+                n.setAttribute('revMoveId', move_id)
+        for n in self._inserted:
+            if n.nodeType == Node.TEXT_NODE:
+                self._mark_change(n.parentNode, 'inserted-text')
+            else:
+                self._mark_change(n, 'inserted')
+        for n, attribs in self._updated.items():
+            self._mark_change(n, 'updated')
+            n.setAttribute('revUpdates', ','.join(attribs))
+
+        return self._orig_tree, self._tree
 
 class XupdateScriptStore(ScriptStore):
     def __init__(self, tree):

@@ -5,7 +5,7 @@ from tree_iface import ListTreeIface
 class TreeMatcher:
     def __init__(self, tree1, tree2, f=0.6, t=0.5, 
                  tree_parser=ListTreeIface, script_store=ScriptStore):
-        self._orig_tree = tree_parser(tree1)
+        self._tree1 = tree_parser(tree1)
         self._tree2 = tree_parser(tree2)
         self._script_store = script_store
         self._f = f
@@ -96,7 +96,6 @@ class TreeMatcher:
         return scrpt
 
     def _match(self):
-        self._tree1 = self._orig_tree.deep_copy()
         self._mapping = []
         unmatched1, unmatched2 = [], []
         leaf_labels1, middle_labels1 = self._tree1.get_labels()
