@@ -8,7 +8,7 @@
   <html>
     <head>
       <link rel="stylesheet" type="text/css" href="treediff.css" />
-      <script type="text/javascript" src="aria_list.js" />
+      <script type="text/javascript" src="treediff.js" />
       <title>An Experiment</title>
     </head>
     <body>
@@ -54,6 +54,15 @@
 		<xsl:attribute name="class">
 		  <xsl:value-of select="concat($baseclass,' revMoved')"/>
 		</xsl:attribute> 
+		<xsl:attribute name="id">
+		  <xsl:value-of select="concat('move', @revtree:moveId)"/>
+		</xsl:attribute> 
+		<xsl:attribute name="onmouseover">
+          highlightMoved(this);
+		</xsl:attribute>    
+		<xsl:attribute name="onmouseout">
+          unhighlightMoved(this);
+		</xsl:attribute>         
 	  </xsl:when>
 
 	  <xsl:when test="contains(@revtree:changes, 'deleted-self')">
