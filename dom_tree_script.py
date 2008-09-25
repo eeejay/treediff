@@ -62,8 +62,9 @@ class MarkChangesScriptStore(ScriptStore):
                     self._mark_change(n.parentNode, 'moved-text')
                     n.setAttribute('revtree:moveTextId', move_id)
                 else:
-                    self._mark_change(n, 'moved')
+                    self._mark_change(n, 'moved-self')
                     n.setAttribute('revtree:moveId', move_id)
+
         # Delete
         for n in self._deleted:
             if n.nodeType == Node.TEXT_NODE:
@@ -75,7 +76,8 @@ class MarkChangesScriptStore(ScriptStore):
                     self._add_attrib_name(
                         n.ownerElement, 'deletedAttribs', n.name)
             else:
-                self._mark_change(n, 'deleted')
+                self._mark_change(n, 'deleted-self')
+
         # Insert
         for n in self._inserted:
             #n = pairs2[n]
@@ -89,7 +91,8 @@ class MarkChangesScriptStore(ScriptStore):
                     self._add_attrib_name(
                         pairs2[n.ownerElement], 'insertedAttribs', n.name)
             else:
-                self._mark_change(pairs2[n], 'inserted')
+                self._mark_change(pairs2[n], 'inserted-self')
+
         # Update
         for n in self._updated:
             if n.nodeType == Node.ATTRIBUTE_NODE:
@@ -99,7 +102,23 @@ class MarkChangesScriptStore(ScriptStore):
                         pairs2[n.ownerElement], 'updatedAttribs', n.name)
             elif n.nodeType == Node.TEXT_NODE:
                 self._mark_change(pairs2[n].parentNode, 'updated-text')
-        return tree1, tree2
+        
+        return tree1.get_doc(), tree2.get_doc()
+
+    def get_sidebyside(self):
+        doc = getDOMImplementation().createDocument('', 'sidebyside', None)
+        doc.insertBefore(doc.createProcessingInstruction(
+                'xml-stylesheet', 'type="text/xsl" href="treediff.xsl"'),
+                         doc.documentElement)
+        doc1, doc2 = self.get_tree_revs()
+        left = doc.createElement('left')
+        left.appendChild(doc1.documentElement)
+        doc.documentElement.appendChild(left)
+        right = doc.createElement('right')
+        right.appendChild(doc2.documentElement)
+        doc.documentElement.appendChild(right)
+        return doc
+        
 
 class XupdateScriptStore(ScriptStore):
     def __init__(self, tree):

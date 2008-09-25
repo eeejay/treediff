@@ -117,34 +117,55 @@ class DomTreeIface(TreeIface):
             parent.removeChild(node)
             node.unlink()
         self._update_descendant_count(parent)
+
     def update(self, node, val):
         if node.nodeType == node.ATTRIBUTE_NODE:
             node.ownerElement.setAttribute(node.name, val)
         if node.nodeType == node.TEXT_NODE:
             node.data = val
 
+    def get_doc(self):
+        return self._dom
+
+def strip_whitespace(element):
+    if element is None: 
+        return
+    sibling = element.firstChild
+    while sibling:
+        nextSibling = sibling.nextSibling
+        if sibling.nodeType == Node.TEXT_NODE and sibling.data.strip() == '':
+            element.removeChild(sibling)
+        else:
+            strip_whitespace(sibling)
+        sibling = nextSibling
+    
+
 if __name__ == '__main__':
     from sys import argv
     from xml.dom.minidom import parse
-    from dom_tree_matcher import DomTreeMatcher
+    from dom_tree_matcher import DomTreeMatcher, DomVisualTreeMatcher
     from dom_tree_script import MarkChangesScriptStore
+    from visualizer import VisualTreeMatcher
+    from script_store import ScriptStore
 
     fn = ['tests/simple_tree1.xml', 'tests/simple_tree2.xml']
     if len(argv[1:]) == 2:
         fn = argv[1:]
 
-    #from visualizer import VisualTreeMatcher as DomTreeMatcher
     dom1 = parse(fn[0])
     dom2 = parse(fn[1])
-    tm = DomTreeMatcher(dom1, dom2, script_store=MarkChangesScriptStore)
+
+    strip_whitespace(dom1)
+    strip_whitespace(dom2)
+
+    tm = DomVisualTreeMatcher(dom1, dom2, 
+                        script_store=MarkChangesScriptStore)
 #    tm._match()
 #    tm.draw_trees(True, '/tmp/t.dot')
+#    tm.print_mapping()
     s = tm.get_opcodes()
-    for i in s: print i
-    t1, t2 = s.get_tree_revs()
-    print t1.get_root().toprettyxml()
-    print '-'*80    
-    print t2.get_root().toprettyxml()
+#    for i in s: print i
+    print s.get_sidebyside().toprettyxml('  ').encode('utf-8')
 #    print 'inserted', s._inserted
 #    print 'deleted', s._deleted
 #    print 'moved', s._moved

@@ -17,3 +17,5 @@ class DomTreeMatcher(TreeMatcher):
                     if ppartner == self._tree2.get_parent(n2):
                         self._map(n1, n2)
 
+class DomVisualTreeMatcher(DomTreeMatcher, VisualTreeMatcher):
+    pass

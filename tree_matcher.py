@@ -17,7 +17,7 @@ class TreeMatcher:
 
     def print_mapping(self):
         for n1, n2 in self._mapping:
-            print '%s\t%s' % (self._tree1.node_repr(n1), 
+            print '%s\t\t\t%s' % (self._tree1.node_repr(n1), 
                               self._tree2.node_repr(n2))
 
     def _get_partner(self, node):
@@ -114,11 +114,12 @@ class TreeMatcher:
                     s2.remove(n2)
                     self._map(n1, n2)
                 for n1, n2 in [(x,y) for x in s1 for y in s2]:
-                    if self._tree1.is_mapped(n1)or not equal(n1, n2):
-                        continue
-                    self._map(n1, n2)
-            unmatched1 += s1
-            unmatched2 += s2
+                    if equal(n1, n2) and \
+                            not self._tree1.is_mapped(n1) \
+                            and not self._tree2.is_mapped(n2):
+                        self._map(n1, n2)
+                unmatched1 += s1
+                unmatched2 += s2
         return unmatched1, unmatched2
 
     def _map(self, n1, n2):
