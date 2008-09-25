@@ -25,7 +25,23 @@ a.accessible:link {
 .revMoved { 
   background-color: #FFF791;
 }
+/*
+span.revUpdated { 
+  color: #000085;
+}
 
+span.revDeleted { 
+  color: #AE0000;
+}
+
+span.revInserted { 
+  color: #009305;
+}
+
+span.revMoved { 
+  color: #FF8200;
+}
+*/
 ul { 
   padding-left: 1em;
   list-style: none;

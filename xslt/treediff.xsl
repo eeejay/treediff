@@ -12,6 +12,14 @@
       <title>An Experiment</title>
     </head>
     <body>
+      <p>
+        <span class="revInserted">Inserted</span><xsl:text> </xsl:text>
+        <span class="revDeleted">Deleted</span><xsl:text> </xsl:text>
+        <span class="revUpdated">Updated</span><xsl:text> </xsl:text>
+        <span class="revMoved">Moved</span><br/>
+        <span><b>[</b>name • role • description • state<b>]</b> 
+</span>
+      </p>
       <table border="1">
         <tr>
           <xsl:apply-templates/> 
