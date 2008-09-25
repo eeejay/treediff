@@ -12,16 +12,15 @@ class MarkChangesScriptStore(ScriptStore):
         self._deleted = []
         self._inserted = []
         self._moved = []
-        self._updated = {}
+        self._updated = []
 
     def move(self, node, parent, index):
         self._moved.append(
-            (self._pairs[node], node, hex(hash(random()))))
+            (self._pairs[node], node, hex(abs(hash(random())))))
         ScriptStore.move(self, node, parent, index)
 
     def update(self, node, value):
-        if node_type == Node.ATTRIBUTE_NODE:
-            self._updated.setdefault(node.ownerElement, []).append(node.name)
+        self._updated.append(node)
         ScriptStore.update(self, node, value)
 
     def insert(self, node, label, value, parent, index):
@@ -34,33 +33,73 @@ class MarkChangesScriptStore(ScriptStore):
     
 
     def _mark_change(self, node, change_text):
-        ops = node.getAttribute('revTree')
-        if ops:
-            ops = ','.join(ops.split(',') + [change_text])
-        else:
-            ops = change_text
-        node.setAttribute('revTree', ops)
+        ops = node.getAttribute('revtree:changes')
+        ops = ','.join(set(filter(lambda x: bool(x), ops.split(',')) + [change_text]))
+        node.setAttribute('revtree:changes', ops)
+
+    def _add_attrib_name(self, node, key, attrib_name):
+        l = node.getAttribute('revtree:'+key)
+        l = ','.join(filter(lambda x: bool(x), l.split(',')) + [attrib_name])
+        node.setAttribute('revtree:'+key, l)
 
     def get_tree_revs(self):
+        tree1 = self._orig_tree
+        tree2 = self._tree.deep_copy()
+        pairs2 = dict(zip(self._tree.nodes_breadth(), tree2.nodes_breadth()))
+
+        for tree in (tree1, tree2):
+            tree.get_root().setAttribute(
+                'xmlns:revtree', 'http://monotonous.org')
+        # Move
+        for n1, n2, move_id in self._moved:
+            if n1.nodeType == Node.ATTRIBUTE_NODE:
+                # This is complicated, just do del/ins.
+                self._deleted.append(n1)
+                self._inserted.append(n2)
+                continue
+            for n in (n1, pairs2[n2]):
+                if n.nodeType == Node.TEXT_NODE:
+                    self._mark_change(n.parentNode, 'moved-text')
+                    n.setAttribute('revtree:moveTextId', move_id)
+                else:
+                    self._mark_change(n, 'moved')
+                    n.setAttribute('revtree:moveId', move_id)
+        # Delete
         for n in self._deleted:
             if n.nodeType == Node.TEXT_NODE:
-                self._mark_change(n.parentNode, 'deleted-text')
+                if n.parentNode not in self._deleted:
+                    self._mark_change(n.parentNode, 'deleted-text')
+            elif n.nodeType == Node.ATTRIBUTE_NODE:
+                if n.ownerElement not in self._deleted:
+                    self._mark_change(n.ownerElement, 'deleted-attrib')
+                    self._add_attrib_name(
+                        n.ownerElement, 'deletedAttribs', n.name)
             else:
                 self._mark_change(n, 'deleted')
-        for n1, n2, move_id in self._moved:
-            for n in (n1, n2):
-                self._mark_change(n, 'moved')
-                n.setAttribute('revMoveId', move_id)
+        # Insert
         for n in self._inserted:
+            #n = pairs2[n]
             if n.nodeType == Node.TEXT_NODE:
-                self._mark_change(n.parentNode, 'inserted-text')
+                if n.parentNode not in self._inserted:
+                    self._mark_change(pairs2[n].parentNode, 'inserted-text')
+            elif n.nodeType == Node.ATTRIBUTE_NODE:
+                if n.ownerElement not in self._inserted:
+                    self._mark_change(pairs2[n.ownerElement], 
+                                      'inserted-attrib')
+                    self._add_attrib_name(
+                        pairs2[n.ownerElement], 'insertedAttribs', n.name)
             else:
-                self._mark_change(n, 'inserted')
-        for n, attribs in self._updated.items():
-            self._mark_change(n, 'updated')
-            n.setAttribute('revUpdates', ','.join(attribs))
-
-        return self._orig_tree, self._tree
+                self._mark_change(pairs2[n], 'inserted')
+        # Update
+        for n in self._updated:
+            if n.nodeType == Node.ATTRIBUTE_NODE:
+                self._mark_change(pairs2[n.ownerElement], 
+                                      'updated-attrib')
+                self._add_attrib_name(
+                        pairs2[n.ownerElement], 'updatedAttribs', n.name)
+            elif n.nodeType == Node.TEXT_NODE:
+                self._mark_change(pairs2[n].parentNode, 'updated-text')
+        return tree1, tree2
 
 class XupdateScriptStore(ScriptStore):
     def __init__(self, tree):
