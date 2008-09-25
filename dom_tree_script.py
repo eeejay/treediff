@@ -56,14 +56,18 @@ class MarkChangesScriptStore(ScriptStore):
                 # This is complicated, just do del/ins.
                 self._deleted.append(n1)
                 self._inserted.append(n2)
-                continue
-            for n in (n1, pairs2[n2]):
-                if n.nodeType == Node.TEXT_NODE:
-                    self._mark_change(n.parentNode, 'moved-text')
-                    n.setAttribute('revtree:moveTextId', move_id)
-                else:
-                    self._mark_change(n, 'moved-self')
-                    n.setAttribute('revtree:moveId', move_id)
+            elif n1.nodeType == Node.TEXT_NODE:
+                self._mark_change(n1.parentNode, 'moved-text')
+                n1.parentNode.setAttribute(
+                    'revtree:moveTextId', move_id+'Left')
+                self._mark_change(pairs2[n2.parentNode], 'moved-text')
+                pairs2[n2.parentNode].setAttribute(
+                    'revtree:moveTextId', move_id+'Right')
+            else:
+                self._mark_change(n1, 'moved-self')
+                n1.setAttribute('revtree:moveId', move_id+'Left')
+                self._mark_change(pairs2[n2], 'moved-self')
+                pairs2[n2].setAttribute('revtree:moveId', move_id+'Right')
 
         # Delete
         for n in self._deleted:
@@ -83,7 +87,7 @@ class MarkChangesScriptStore(ScriptStore):
             #n = pairs2[n]
             if n.nodeType == Node.TEXT_NODE:
                 if n.parentNode not in self._inserted:
-                    self._mark_change(pairs2[n].parentNode, 'inserted-text')
+                    self._mark_change(pairs2[n.parentNode], 'inserted-text')
             elif n.nodeType == Node.ATTRIBUTE_NODE:
                 if n.ownerElement not in self._inserted:
                     self._mark_change(pairs2[n.ownerElement], 
