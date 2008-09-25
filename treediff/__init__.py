@@ -1,5 +1,5 @@
 from tree_matcher import TreeMatcher
-
+from dom_tree_matcher import DomTreeMatcher
 
 if __name__ == '__main__':
     def test_trees():
