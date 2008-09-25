@@ -5,7 +5,7 @@
 <xsl:template match="/sidebyside">
   <html>
     <head>
-      <link rel="stylesheet" type="text/css" href="aria_list.css" />
+      <link rel="stylesheet" type="text/css" href="treedif.css" />
       <script type="text/javascript" src="aria_list.js" />
       <title>An Experiment</title>
     </head>
@@ -33,28 +33,7 @@
 
 <xsl:template match="accessible">
   <li>
-    <a href="#" onclick="showDetails(this)" class="accessible">
-      [<xsl:value-of select="@name"/>|<xsl:value-of select="@role"/>]
-    </a>
-    <table class="moreinfo">
-      <tr>
-        <td class="fieldname">Name:</td>
-        <td class="fieldvalue"><xsl:value-of select="@name"/></td>
-      </tr>
-      <tr>
-        <td class="fieldname">Role:</td>
-        <td class="fieldvalue"><xsl:value-of select="@role"/></td>
-      </tr>
-      <tr>
-        <td class="fieldname">Description:</td>
-        <td class="fieldvalue"><xsl:value-of select="@description"/></td>
-      </tr>
-      <tr>
-        <td class="fieldname">State:</td>
-        <td class="fieldvalue"><xsl:value-of select="@state"/></td>
-      </tr>
-    </table>
-        
+    [<xsl:value-of select="@name"/> | <xsl:value-of select="@role"/>]
     <xsl:if test="count(child::node())">
       <ul>
         <xsl:apply-templates/> 
