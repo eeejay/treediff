@@ -82,12 +82,12 @@ class DomTreeIface(TreeIface):
                 node.parentNode.removeChild(node)
                 parent.appendChild(node)
             else:
-                print 'insertBefore', self.node_repr(refnode)
                 node.parentNode.removeChild(node)
                 parent.insertBefore(node, refnode)
             self._update_descendant_count(self.get_parent(node))
         self._update_descendant_count(parent)
     def insert(self, label, value, parent, index):
+        index -= 1
         node_type = int(label[:1])
         label = label.split('~', 1)[1]
         if node_type == Node.ATTRIBUTE_NODE:
@@ -112,7 +112,6 @@ class DomTreeIface(TreeIface):
                 parent.appendChild(n)
             else:
                 parent.insertBefore(n, refnode)
-
         self._update_descendant_count(parent)
         return n
 

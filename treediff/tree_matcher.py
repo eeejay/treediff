@@ -38,11 +38,7 @@ class TreeMatcher:
             return 1
         v = left_of_ordered[-1]
         u = self._get_partner(v)
-        ordered_children = filter(
-            lambda n: self._tree1.is_ordered(n), 
-            self._tree1.get_children(self._tree1.get_parent(u)))
-        rv = ordered_children.index(u) + 2
-        return rv
+        return self._tree1.get_index_in_parent(u) + 2
 
     def _align_children(self, w, x, scrpt):
         # mark all children of w and x and "not in order"
