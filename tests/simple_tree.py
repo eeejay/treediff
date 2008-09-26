@@ -48,5 +48,8 @@ class TestSimpleTree(unittest.TestCase):
             self.assertEqual(op.args, expected.args,
                              "Op args don't match.")
 
+        self.assertEqual(len(matcher.get_opcodes()), 0,
+                         "Script is not accurate")
+
 if __name__ == '__main__':
     unittest.main()
