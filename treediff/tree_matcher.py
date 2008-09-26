@@ -59,7 +59,7 @@ class TreeMatcher:
         for a in s1:
             b = self._get_partner(a)
             if (a, b) in self._mapping and (a, b) not in s:
-            #if True:
+            #if False:
                 self._tree1.mark_ordered(a, True)
                 self._tree2.mark_ordered(b, True)
                 k = self._find_pos(b)
@@ -92,7 +92,7 @@ class TreeMatcher:
                     k = self._find_pos(x)
                     scrpt.move(w, z, k)
                     self._tree1.move(w, z, k)
-#                    self._tree1.mark_ordered(w, True)
+                    self._tree1.mark_ordered(w, True)
             self._align_children(w, x, scrpt)
         # Depth traversal of T1
         for w in self._tree1.nodes_postorder():

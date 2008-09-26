@@ -76,12 +76,14 @@ class DomTreeIface(TreeIface):
             node.ownerElement = None
             parent.setAttributeNode(node)
         else:
-            node.parentNode.removeChild(node)
             try:
                 refnode = parent.childNodes[index]
             except IndexError:
+                node.parentNode.removeChild(node)
                 parent.appendChild(node)
             else:
+                print 'insertBefore', self.node_repr(refnode)
+                node.parentNode.removeChild(node)
                 parent.insertBefore(node, refnode)
             self._update_descendant_count(self.get_parent(node))
         self._update_descendant_count(parent)
@@ -95,6 +97,8 @@ class DomTreeIface(TreeIface):
             n = self._dom.createElement(label)
         elif node_type == Node.TEXT_NODE:
             n = self._dom.createTextNode(value)
+        elif node_type == Node.COMMENT_NODE:
+            n = self._dom.createComment(value)
         else:
             #TODO: More node types
             n = None
