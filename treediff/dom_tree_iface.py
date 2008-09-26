@@ -17,8 +17,11 @@ class DomTreeIface(TreeIface):
     def is_mapped(self, node):
         return bool(node.getUserData('mapped'))
     def mark_ordered(self, node, ordered):
+#        print 'mark ordered', self.node_repr(node), ordered
         node.setUserData('ordered', ordered, None)
     def is_ordered(self, node):
+#        print 'is ordered', self.node_repr(node), \
+#            bool(node.getUserData('ordered'))
         return bool(node.getUserData('ordered'))
     def get_descendant_count(self, node):
         return node.getUserData('descendant_count')
@@ -108,6 +111,7 @@ class DomTreeIface(TreeIface):
 
         self._update_descendant_count(parent)
         return n
+
     def delete(self, node):
         if node.nodeType == node.ATTRIBUTE_NODE:
             parent = node.ownerElement
@@ -160,12 +164,12 @@ if __name__ == '__main__':
 
     tm = DomVisualTreeMatcher(dom1, dom2, 
                         script_store=MarkChangesScriptStore)
-#    tm._match()
-#    tm.draw_trees(True, '/tmp/t.dot')
-#    tm.print_mapping()
-    s = tm.get_opcodes()
+    tm._match()
+    tm.draw_trees(True, '/tmp/t.dot')
+    tm.print_mapping()
+#    s = tm.get_opcodes()
 #    for i in s: print i
-    print s.get_sidebyside().toprettyxml('  ').encode('utf-8')
+#    print s.get_sidebyside().toprettyxml('  ').encode('utf-8')
 #    print 'inserted', s._inserted
 #    print 'deleted', s._deleted
 #    print 'moved', s._moved

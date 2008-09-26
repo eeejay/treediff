@@ -38,8 +38,11 @@ class TreeMatcher:
             return 1
         v = left_of_ordered[-1]
         u = self._get_partner(v)
-        return filter(lambda n: self._tree1.is_ordered(n), 
-                      self._tree1.get_children(self._tree1.get_parent(u))).index(u) + 1
+        ordered_children = filter(
+            lambda n: self._tree1.is_ordered(n), 
+            self._tree1.get_children(self._tree1.get_parent(u)))
+        rv = ordered_children.index(u) + 2
+        return rv
 
     def _align_children(self, w, x, scrpt):
         # mark all children of w and x and "not in order"
@@ -57,11 +60,11 @@ class TreeMatcher:
             b = self._get_partner(a)
             if (a, b) in self._mapping and (a, b) not in s:
             #if True:
+                self._tree1.mark_ordered(a, True)
+                self._tree2.mark_ordered(b, True)
                 k = self._find_pos(b)
                 scrpt.move(a, w, k)
                 self._tree1.move(a, w, k)
-                self._tree1.mark_ordered(a, True)
-                self._tree2.mark_ordered(b, True)
         return scrpt
 
     def _do_fmes(self):
@@ -72,6 +75,7 @@ class TreeMatcher:
             z = self._get_partner(y)
             w = self._get_partner(x)
             if not w:
+                self._tree2.mark_ordered(x, True)
                 k = self._find_pos(x)
                 w = self._tree1.insert(
                     self._tree2.get_label(x), self._tree2.get_value(x), z, k)
@@ -84,9 +88,11 @@ class TreeMatcher:
                     scrpt.update(w, self._tree2.get_value(x))
                     self._tree1.update(w, self._tree2.get_value(x))
                 if v != z:
+                    self._tree2.mark_ordered(x, True)
                     k = self._find_pos(x)
                     scrpt.move(w, z, k)
                     self._tree1.move(w, z, k)
+#                    self._tree1.mark_ordered(w, True)
             self._align_children(w, x, scrpt)
         # Depth traversal of T1
         for w in self._tree1.nodes_postorder():
