@@ -69,6 +69,7 @@ class DomTreeIface(TreeIface):
             p = self.get_parent(p)
         return '/'+'/'.join(path)
     def move(self, node, parent, index):
+        index -= 1
         if node.nodeType == node.ATTRIBUTE_NODE:
             node.ownerElement.removeAttributeNode(node)
             self._update_descendant_count(node.ownerElement)
