@@ -128,7 +128,7 @@ class DomTreeIface(TreeIface):
     def update(self, node, val):
         if node.nodeType == node.ATTRIBUTE_NODE:
             node.ownerElement.setAttribute(node.name, val)
-        if node.nodeType == node.TEXT_NODE:
+        if node.nodeType  in (node.TEXT_NODE, node.COMMENT_NODE):
             node.data = val
 
     def get_doc(self):
