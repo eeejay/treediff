@@ -37,7 +37,8 @@ class TestSimpleTree(unittest.TestCase):
         #for o in s: print o
         
         self.assertEqual(len(s), len(EXPECTED_OPS), 
-                         "Script has unexpected length.")
+                         "Script has unexpected length.\n%s" %
+                         '\n'.join(map(str, s)))
 
         for op, expected in zip(s, EXPECTED_OPS):
             self.assertEqual((op.op_type, op.args), 

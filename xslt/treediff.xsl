@@ -30,7 +30,7 @@
 </xsl:template>
 
 <xsl:template match="left">
-  <td>
+  <td width="%50">
     <ul>
       <xsl:apply-templates/> 
     </ul>
@@ -38,7 +38,7 @@
 </xsl:template>
 
 <xsl:template match="right">
-  <td>
+  <td width="%50">
     <ul>
       <xsl:apply-templates/> 
     </ul>

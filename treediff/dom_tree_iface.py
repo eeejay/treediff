@@ -4,7 +4,7 @@ from tree_iface import TreeIface
 class DomTreeIface(TreeIface):
     def __init__(self, tree):
         self._dom = tree
-        self._pedigree = set()
+        self._pedigree = {}
         self._update_descendant_count(self._dom.documentElement)
     def _update_descendant_count(self, node):
         count = 1
@@ -38,7 +38,7 @@ class DomTreeIface(TreeIface):
     def get_parent(self, node):
         if node.nodeType == node.ATTRIBUTE_NODE:
             rv = node.ownerElement
-        elif node == self._dom.documentElement:
+        elif id(node) == id(self._dom.documentElement):
             return None
         else:
             rv = node.parentNode
@@ -168,10 +168,10 @@ if __name__ == '__main__':
 
     tm = DomVisualTreeMatcher(dom1, dom2, 
                         script_store=MarkChangesScriptStore)
-    tm._match()
-    tm.draw_trees(True, '/tmp/t.dot')
-    tm.print_mapping()
-#    s = tm.get_opcodes()
+#    tm._match()
+#    tm.draw_trees(True, '/tmp/t.dot')
+#    tm.print_mapping()
+    s = tm.get_opcodes()
 #    for i in s: print i
 #    print s.get_sidebyside().toprettyxml('  ').encode('utf-8')
 #    print 'inserted', s._inserted

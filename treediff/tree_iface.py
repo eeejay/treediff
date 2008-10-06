@@ -25,12 +25,15 @@ class TreeIface:
     def get_root(self):
         raise NotImplemented
     def cache_pedigree(self, node):
-        p = node
-        while self.get_parent(p):
-            self._pedigree.add((id(self.get_parent(p)), id(node)))
+        pedigree = []
+        p = self.get_parent(node)
+        while p:
+            pedigree.append(id(p))
             p = self.get_parent(p)
+        self._pedigree[id(node)] = pedigree
     def is_descendant(self, node, ancestor):
-        return (id(ancestor), id(node)) in self._pedigree
+        pedigree = self._pedigree.get(id(node), [])
+        return id(ancestor) in pedigree
     def get_index_in_parent(self, node, with_same_label=False):
         parent = self.get_parent(node)
         if not parent:
@@ -100,7 +103,7 @@ class ListTreeIface(TreeIface):
         self._tree = tree
         self._mapped = set()
         self._ordered = set()
-        self._pedigree = set()
+        self._pedigree = {}
         self._parents = {}
         self._descendant_count = {}
         self._double_link(self._tree)

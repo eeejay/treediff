@@ -20,11 +20,16 @@ class TreeMatcher:
             print '%s\t\t\t%s' % (self._tree1.node_repr(n1), 
                               self._tree2.node_repr(n2))
 
-    def _get_partner(self, node):
+    def _get_partner_in_t1(self, node):
         for n1, n2 in self._mapping:
-            for n11, n22 in ((n1, n2), (n2, n1)):
-                if id(n11) == id(node):
-                    return n22
+            if id(n2) == id(node):
+                return n1
+        return None
+
+    def _get_partner_in_t2(self, node):
+        for n1, n2 in self._mapping:
+            if id(n1) == id(node):
+                return n2
         return None
 
     def _find_pos(self, x):
@@ -37,23 +42,23 @@ class TreeMatcher:
             # x is the leftmost child that is marked "in order".
             return 1
         v = left_of_ordered[-1]
-        u = self._get_partner(v)
+        u = self._get_partner_in_t1(v) # v is in tree 2
         return self._tree1.get_index_in_parent(u) + 2
 
     def _align_children(self, w, x, scrpt):
         # mark all children of w and x and "not in order"
         self._tree1.mark_children_unordered(w)
         self._tree2.mark_children_unordered(x)
-        s1 = filter(lambda n: self._get_partner(n) in self._tree2.get_children(x), 
-                    self._tree1.get_children(w))
-        s2 = filter(lambda n: self._get_partner(n) in self._tree1.get_children(w), 
-                    self._tree2.get_children(x))
+        s1 = filter(lambda n: self._get_partner_in_t2(n) in self._tree2.get_children(x), 
+                    self._tree1.get_children(w)) # n is in tree 1
+        s2 = filter(lambda n: self._get_partner_in_t1(n) in self._tree1.get_children(w), 
+                    self._tree2.get_children(x))  # n is in tree 2
         s = self._lcs(s1, s2, lambda n1, n2: (n1, n2) in self._mapping)
         for a, b in s:
             self._tree1.mark_ordered(a, True)
             self._tree2.mark_ordered(b, True)
         for a in s1:
-            b = self._get_partner(a)
+            b = self._get_partner_in_t2(a) # a is in tree 1
             if (a, b) in self._mapping and (a, b) not in s:
             #if False:
                 self._tree1.mark_ordered(a, True)
@@ -68,8 +73,8 @@ class TreeMatcher:
         # Breadth first traversal of T2
         for x in self._tree2.nodes_breadth():
             y = self._tree2.get_parent(x)
-            z = self._get_partner(y)
-            w = self._get_partner(x)
+            z = self._get_partner_in_t1(y) # y is in tree 2
+            w = self._get_partner_in_t1(x) # x is in tree 2
             if not w:
                 self._tree2.mark_ordered(x, True)
                 k = self._find_pos(x)
@@ -92,7 +97,7 @@ class TreeMatcher:
             self._align_children(w, x, scrpt)
         # Depth traversal of T1
         for w in self._tree1.nodes_postorder():
-            if not self._get_partner(w):
+            if not self._get_partner_in_t2(w): # w is in tree 1
                 scrpt.delete(w)
                 self._tree1.delete(w)
         return scrpt

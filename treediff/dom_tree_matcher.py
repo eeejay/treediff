@@ -15,7 +15,7 @@ class DomTreeMatcher(TreeMatcher):
         for pair in self._mapping[:]:
             n1, n2 = pair
             if n1.nodeType == Node.ATTRIBUTE_NODE:
-                ppartner = self._get_partner(self._tree1.get_parent(n1))
+                ppartner = self._get_partner_in_t2(self._tree1.get_parent(n1))
                 if ppartner != self._tree2.get_parent(n2):
                     self._mapping.remove(pair)
                     unmatched1.append(n1)
@@ -23,7 +23,7 @@ class DomTreeMatcher(TreeMatcher):
         for n1, n2 in [(x,y) for x in unmatched1 for y in unmatched2]:
             if (n1.nodeType, n2.nodeType) == (Node.ATTRIBUTE_NODE,)*2 and \
                     self._tree1.get_label(n1) == self._tree2.get_label(n2):
-                    ppartner = self._get_partner(self._tree1.get_parent(n1))
+                    ppartner = self._get_partner_in_t2(self._tree1.get_parent(n1))
                     if ppartner == self._tree2.get_parent(n2):
                         self._map(n1, n2)
 
